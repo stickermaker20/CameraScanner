@@ -4,11 +4,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+
 import androidx.appcompat.app.AlertDialog;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
+import android.widget.RelativeLayout;
 
 import com.cam.pdf.and.doc.india.scanner.base.BaseActivity;
+import com.cam.pdf.and.doc.india.scanner.util.Const;
 import com.camv1.pdf.and.doc.india.scanner.handle.HandleActivity;
 import com.camv1.pdf.and.doc.india.scanner.PresenterScanner;
 
@@ -19,13 +27,15 @@ import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class SignActivity extends BaseActivity {
+public class SignActivity extends BaseActivity implements View.OnClickListener {
     @BindView(R.id.signView)
     DrawSignView signView;
+
     private int checkSize = 0;
     private int checkColor = 0;
-    public static final int REQUEST_SIGN=212;
+    public static final int REQUEST_SIGN = 212;
     private String[] color = new String[]{"Black", "Red", "Blue", "Green", "Purple", "Yellow"};
     private int[] resColor;
     private String[] paintSize = new String[]{"6", "10", "20", "30", "40", "45", "50", "60", "70", "80"};
@@ -37,7 +47,6 @@ public class SignActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-
         resColor = new int[]{Color.BLACK, Color.RED, Color.BLUE, Color.GREEN, getResources().getColor(R.color.purple), Color.YELLOW};
     }
 
@@ -45,8 +54,9 @@ public class SignActivity extends BaseActivity {
     protected void initView() {
         setTitle("Sign");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ButterKnife.bind(this);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        ButterKnife.bind(this);
     }
 
     @Override
@@ -57,6 +67,7 @@ public class SignActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d("BackTrackID", "" + item);
         switch (item.getItemId()) {
             case R.id.signClear:
                 signView.clear();
@@ -79,7 +90,9 @@ public class SignActivity extends BaseActivity {
                     }
 
                 }
-
+                break;
+            case android.R.id.home:
+                onBackPressed();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -117,10 +130,20 @@ public class SignActivity extends BaseActivity {
         mDialog.show();
     }
 
-    public static void startSign(Context context){
-        Intent intent=new Intent(context,SignActivity.class);
-        if (context instanceof HandleActivity){
-            ((HandleActivity)context).startActivityForResult(intent,REQUEST_SIGN);
+    public static void startSign(Context context) {
+        Intent intent = new Intent(context, SignActivity.class);
+        if (context instanceof HandleActivity) {
+            ((HandleActivity) context).startActivityForResult(intent, REQUEST_SIGN);
         }
+    }
+
+//    @OnClick(R.id.imgBack)
+//    public void back() {
+//        onBackPressed();
+//    }
+
+    @Override
+    public void onClick(View v) {
+        Log.d("BackTrackID", "onCLick" + v.getId());
     }
 }
