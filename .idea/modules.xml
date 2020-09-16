@@ -2,6 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CameraScanner.iml" filepath="$PROJECT_DIR$/.idea/modules/CameraScanner.iml" group="CameraScanner" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/CameraScanner-app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/CameraScanner-app.iml" group="CameraScanner/app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/dynamicgrid/CameraScanner-dynamicgrid.iml" filepath="$PROJECT_DIR$/.idea/modules/dynamicgrid/CameraScanner-dynamicgrid.iml" group="CameraScanner/dynamicgrid" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/openCVLibrary310/CameraScanner-openCVLibrary310.iml" filepath="$PROJECT_DIR$/.idea/modules/openCVLibrary310/CameraScanner-openCVLibrary310.iml" group="CameraScanner/openCVLibrary310" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/photo-editor-sdk-2.0.27/CameraScanner-photo-editor-sdk-2.0.27.iml" filepath="$PROJECT_DIR$/.idea/modules/photo-editor-sdk-2.0.27/CameraScanner-photo-editor-sdk-2.0.27.iml" group="CameraScanner/photo-editor-sdk-2.0.27" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tedpicker/CameraScanner-tedpicker.iml" filepath="$PROJECT_DIR$/.idea/modules/tedpicker/CameraScanner-tedpicker.iml" group="CameraScanner/tedpicker" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="QueenScanner/app" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/tedpicker/com.github.ParkSangGwon-tedpicker.iml" filepath="$PROJECT_DIR$/.idea/modules/tedpicker/com.github.ParkSangGwon-tedpicker.iml" group="sourcecode/tedpicker" />
       <module fileurl="file://$PROJECT_DIR$/dynamicgrid/dynamicgrid.iml" filepath="$PROJECT_DIR$/dynamicgrid/dynamicgrid.iml" group="pdf-scanner-2020/dynamicgrid" />

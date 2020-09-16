@@ -30,7 +30,7 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name="com.SplashActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/FullscreenTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

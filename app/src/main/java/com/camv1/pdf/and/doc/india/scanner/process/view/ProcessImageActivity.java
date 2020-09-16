@@ -156,20 +156,36 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
+    int lastvalue = 0;
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (fromUser) {
-            Log.d("ThresholdChecker", ""+progress);
-            if (progress > 10) {
-                Mat imageMat = new Mat();
-                Utils.bitmapToMat(bitmap, imageMat);
-                applyThreshold(imageMat, progress);
-                // Imgproc.cvtColor(imageMat, imageMat, Imgproc.COLOR_BGR2GRAY);
-//                Imgproc.adaptiveThreshold(imageMat, imageMat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 9, progress);
-//                Utils.matToBitmap(imageMat, bitmap);
-                //  styler.updateStyle();
+            Log.d("ThresholdChecker", "" + progress);
+            Mat imageMat = new Mat();
+            Utils.bitmapToMat(bitmap, imageMat);
+            if (progress >= 0 && progress < 10 && lastvalue != 0) {
+                bitmap = PresenterScanner.bitmapSelected;
+            } else if (progress >= 10 && progress < 20 && lastvalue != 1) {
+                lastvalue = 1;
+                bitmap = applyThreshold(imageMat, 18);
+            } else if (progress >= 20 && progress < 35 && lastvalue != 2) {
+                lastvalue = 2;
+                bitmap = applyThreshold(imageMat, 25);
+            } else if (progress >= 35 && progress < 50 && lastvalue != 3) {
+                lastvalue = 3;
+                bitmap = applyThreshold(imageMat, 32);
+            } else if (progress >= 50 && progress < 65 && lastvalue != 4) {
+                lastvalue = 4;
+                bitmap = applyThreshold(imageMat, 41);
+            } else if (progress >= 65 && progress < 80 && lastvalue != 5) {
+                lastvalue = 5;
+                bitmap = applyThreshold(imageMat, 48);
+            } else if (progress >= 80 && progress < 100 && lastvalue != 6) {
+                lastvalue = 6;
+                bitmap = applyThreshold(imageMat, 55);
             }
+            styler.updateStyle();
         }
     }
 
@@ -223,7 +239,6 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
         } else {
             ((SimpleDocumentScannerActivity) context).startActivityForResult(intent, DocumentActivity.REQUEST_IMPORT);
         }
-
     }
 
     @Override
@@ -235,12 +250,12 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
 
     private Bitmap applyThreshold(Mat src, int value) {
         Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.adaptiveThreshold(src, src, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 9, value);
-        // Imgproc.threshold(src, src, value, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
+        Imgproc.adaptiveThreshold(src, src, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 21, value);
+        Imgproc.threshold(src, src, 0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
         //  Imgproc.threshold(src, src, 10, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
         //  Bitmap bm = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888);
-        // org.opencv.android.Utils.matToBitmap(src, bitmap);
-
+        org.opencv.android.Utils.matToBitmap(src, bitmap);
         return bitmap;
     }
 }
+
