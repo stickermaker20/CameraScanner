@@ -48,7 +48,7 @@ public class ProcessAdapter extends RecyclerView.Adapter<ProcessAdapter.ViewHold
             this.lstPosition.clear();
             this.lstFilter.addAll(lstFilter);
             for (int i = 0; i < lstFilter.size(); i++) {
-                if (i == 0) {
+                if (i == 1) {
                     lstPosition.add(enable);
                 } else {
                     lstPosition.add(disable);
@@ -82,11 +82,17 @@ public class ProcessAdapter extends RecyclerView.Adapter<ProcessAdapter.ViewHold
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (position == 1) {
+                    ProcessImageActivity.enable = "true";
+                    ProcessImageActivity.position = "false";
+                } else {
+                    ProcessImageActivity.enable = "false";
+                    ProcessImageActivity.position = "true";
+                }
                 processPresenter.onItemClick(baseAdjuster);
                 lstPosition.set(oldPosition, disable);
                 lstPosition.set(position, enable);
                 oldPosition = position;
-
                 notifyDataSetChanged();
             }
         });

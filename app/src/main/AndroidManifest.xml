@@ -131,8 +131,7 @@
             android:label="@string/settings"
             android:theme="@style/AppTheme" /> <!-- PHOTO EDITOR -->
         <activity android:name="com.camv1.pdf.and.doc.india.scanner.process.view.ProcessImageActivity" />
-        <activity
-            android:name="com.camv1.pdf.and.doc.india.scanner.sign.view.SignActivity"/>
+        <activity android:name="com.camv1.pdf.and.doc.india.scanner.sign.view.SignActivity" />
         <activity android:name="com.camv1.pdf.and.doc.india.scanner.process.view.CombineBitMapActivity" />
         <activity android:name="com.camv1.pdf.and.doc.india.scanner.document.DocumentActivity" />
         <activity android:name="com.camv1.pdf.and.doc.india.scanner.handle.HandleActivity" />

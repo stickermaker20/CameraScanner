@@ -11,11 +11,14 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
 import com.cam.pdf.and.doc.india.scanner.base.BaseActivity;
@@ -25,6 +28,7 @@ import com.camv1.pdf.and.doc.india.scanner.activities.SimpleDocumentScannerActiv
 import com.camv1.pdf.and.doc.india.scanner.document.DocumentActivity;
 import com.camv1.pdf.and.doc.india.scanner.process.presenter.ProcessPresenter;
 import com.camv1.pdf.and.doc.india.scanner.PresenterScanner;
+import com.itextpdf.text.pdf.parser.Line;
 import com.joshuabutton.queenscanner.process.adapter.ProcessAdapter;
 import com.joshuabutton.queenscanner.process.model.FilterModel;
 import com.joshuabutton.queenscanner.process.presenter.IProcessPresenter;
@@ -36,6 +40,8 @@ import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,6 +50,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.OnClick;
 import it.chengdazhi.styleimageview.Styler;
+import ly.img.android.sdk.cropper.cropwindow.handle.Handle;
 
 public class ProcessImageActivity extends BaseActivity implements IProcessView, SeekBar.OnSeekBarChangeListener {
     @BindView(R.id.imgSave)
@@ -52,20 +59,28 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
     ImageView imgRotate;
     @BindView(R.id.rcView)
     RecyclerView rcView;
+    @BindView(R.id.seekbar_layout)
+    LinearLayout seekbar_layout;
     @BindView(R.id.imgView2)
-    ImageView imageView;
-    @BindView(R.id.sbFilter)
-    SeekBar sbFilter;
+    public ImageView imageView;
+    @BindView(R.id.sb_constant)
+    SeekBar sb_constant;
+    @BindView(R.id.sb_block)
+    SeekBar sb_block;
     private IProcessPresenter presenter;
     private ProcessAdapter adapter;
-    private Bitmap bitmap;
+    public Bitmap bitmap;
     public static Bitmap bitMapSource;
     private String folderPath;
     private static int REQUEST_SIGN = 1;
-
+    int blockvalue = 9;
+    int constantvalue = 41;
     private Styler styler;
     AdsTask adsTask;
-
+    Handler bitmaphandler;
+    Runnable bitmapRunnable;
+    public static String position = "false";
+    public static String enable = "true";
 
     @Override
     protected int getLayoutRes() {
@@ -82,7 +97,31 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
         List<FilterModel> lst = presenter.getListModel();
         adapter.loadData(lst);
         styler.setMode(lst.get(0).getMode()).updateStyle();
-        sbFilter.setOnSeekBarChangeListener(this);
+        sb_block.setOnSeekBarChangeListener(this);
+        sb_constant.setOnSeekBarChangeListener(this);
+        bitmaphandler = new Handler();
+        bitmapRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (position.equals("true")) {
+                    position = "false";
+                    imageView.setImageBitmap(bitmap);
+                }
+                if (enable.equals("true")) {
+                    enable = "";
+                    Mat imageMat = new Mat();
+                    Utils.bitmapToMat(bitmap, imageMat);
+                    Bitmap mResult = applyThreshold(imageMat);
+                    imageView.setImageBitmap(mResult);
+                    seekbar_layout.setVisibility(View.VISIBLE);
+                } else if (enable.equals("false")) {
+                    enable = "";
+                    seekbar_layout.setVisibility(View.GONE);
+                }
+                bitmaphandler.postDelayed(bitmapRunnable, 100);
+            }
+        };
+        bitmaphandler.post(bitmapRunnable);
     }
 
     @Override
@@ -124,6 +163,7 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
         String folderPath = presenter.getFolderPath(this.folderPath);
 //        String imagePath = folderPath + "/" + getImagePath();
         String imagePath = folderPath + "/A" + System.currentTimeMillis() + ".jpg";
+
         ImageUtils.saveBitMap(styler.getBitmap(), imagePath);
         File file = new File(folderPath);
         String pdfName = file.getName() + ".pdf";
@@ -146,6 +186,7 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
 
     @Override
     public void onItemClick(FilterModel adjuster) {
+
         styler.setMode(adjuster.getMode()).updateStyle();
     }
 
@@ -159,33 +200,46 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
     int lastvalue = 0;
 
     @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+    public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
         if (fromUser) {
+            Bitmap mResult = null;
             Log.d("ThresholdChecker", "" + progress);
             Mat imageMat = new Mat();
             Utils.bitmapToMat(bitmap, imageMat);
-            if (progress >= 0 && progress < 10 && lastvalue != 0) {
-                bitmap = PresenterScanner.bitmapSelected;
-            } else if (progress >= 10 && progress < 20 && lastvalue != 1) {
-                lastvalue = 1;
-                bitmap = applyThreshold(imageMat, 18);
-            } else if (progress >= 20 && progress < 35 && lastvalue != 2) {
-                lastvalue = 2;
-                bitmap = applyThreshold(imageMat, 25);
-            } else if (progress >= 35 && progress < 50 && lastvalue != 3) {
-                lastvalue = 3;
-                bitmap = applyThreshold(imageMat, 32);
-            } else if (progress >= 50 && progress < 65 && lastvalue != 4) {
-                lastvalue = 4;
-                bitmap = applyThreshold(imageMat, 41);
-            } else if (progress >= 65 && progress < 80 && lastvalue != 5) {
-                lastvalue = 5;
-                bitmap = applyThreshold(imageMat, 48);
-            } else if (progress >= 80 && progress < 100 && lastvalue != 6) {
-                lastvalue = 6;
-                bitmap = applyThreshold(imageMat, 55);
+            switch (bar.getId()) {
+                case R.id.sb_block:
+                    if (progress < 10) {
+                        blockvalue = 5;
+                    } else if (progress < 20) {
+                        blockvalue = 7;
+                    } else if (progress < 30) {
+                        blockvalue = 9;
+                    } else if (progress < 40) {
+                        blockvalue = 11;
+                    } else if (progress < 50) {
+                        blockvalue = 13;
+                    } else if (progress < 60) {
+                        blockvalue = 15;
+                    } else if (progress < 70) {
+                        blockvalue = 17;
+                    } else if (progress < 80) {
+                        blockvalue = 19;
+                    } else if (progress < 90) {
+                        blockvalue = 21;
+                    } else if (progress < 101) {
+                        blockvalue = 23;
+                    }
+                    mResult = applyThreshold(imageMat);
+                    imageView.setImageBitmap(mResult);
+                    break;
+
+                case R.id.sb_constant:
+                    constantvalue = progress;
+                    mResult = applyThreshold(imageMat);
+                    imageView.setImageBitmap(mResult);
+                    break;
             }
-            styler.updateStyle();
+            //  styler.updateStyle();
         }
     }
 
@@ -247,15 +301,15 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
         adsTask.destroyBannerAds();
     }
 
+    private Bitmap applyThreshold(Mat src) {
 
-    private Bitmap applyThreshold(Mat src, int value) {
         Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.adaptiveThreshold(src, src, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 21, value);
+        Imgproc.adaptiveThreshold(src, src, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, blockvalue, constantvalue);
         Imgproc.threshold(src, src, 0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
-        //  Imgproc.threshold(src, src, 10, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
-        //  Bitmap bm = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888);
-        org.opencv.android.Utils.matToBitmap(src, bitmap);
-        return bitmap;
+
+        Bitmap bm = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888);
+        org.opencv.android.Utils.matToBitmap(src, bm);
+        return bm;
     }
 }
 

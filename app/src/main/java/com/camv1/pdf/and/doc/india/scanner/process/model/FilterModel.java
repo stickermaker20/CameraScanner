@@ -20,7 +20,7 @@ public class FilterModel {
         this.title = title;
         this.mode = mode;
     }
-    
+
     public String getTitle() {
         return title;
     }
@@ -32,6 +32,7 @@ public class FilterModel {
     public List<FilterModel> getFilterModels() {
         List<FilterModel> lst = new ArrayList<>();
         lst.add(new FilterModel("Original", Styler.Mode.NONE));
+        lst.add(new FilterModel("Threshold", Styler.Mode.NONE));
         lst.add(new FilterModel("Grey Scale", Styler.Mode.GREY_SCALE));
         lst.add(new FilterModel("Invert", Styler.Mode.INVERT));
         lst.add(new FilterModel("RGB to BGR", Styler.Mode.RGB_TO_BGR));

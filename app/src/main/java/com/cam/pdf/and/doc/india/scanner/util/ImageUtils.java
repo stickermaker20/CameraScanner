@@ -42,6 +42,7 @@ import java.util.List;
 import static com.cam.pdf.and.doc.india.scanner.camscanner.MyPDFActivity.PAGE_SIZE_VALUE;
 import static com.cam.pdf.and.doc.india.scanner.camscanner.MyPDFActivity.positionOfImageScale;
 import static com.cam.pdf.and.doc.india.scanner.camscanner.MyPDFActivity.positionOfPageSize;
+
 import com.camv1.pdf.and.doc.india.scanner.document.DocumentActivity;
 
 public class ImageUtils {
@@ -113,7 +114,7 @@ public class ImageUtils {
         OutputStream bufferedOutputStream = null;
         try {
             bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(imagePath));
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, bufferedOutputStream);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, bufferedOutputStream);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -123,7 +124,6 @@ public class ImageUtils {
         if (imagePaths != null && imagePaths.size() > 0) {
             new imageToPdf(imagePaths, context).execute(destination);
         }
-
     }
 
     public static Bitmap rotateBitmap(Bitmap source, float angle) {
@@ -217,8 +217,7 @@ public class ImageUtils {
 
         @Override
         protected void onPostExecute(String s) {
-            if (((Activity)context).isFinishing())
-            {
+            if (((Activity) context).isFinishing()) {
                 return;
             }
             dialog.dismiss();

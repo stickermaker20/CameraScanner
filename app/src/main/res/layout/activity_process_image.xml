@@ -33,26 +33,61 @@
     <LinearLayout
         android:id="@+id/linear0"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="80dp"
         android:layout_above="@+id/rcView"
         android:background="@color/colorPrimaryDark">
 
-        <ImageView
-            android:id="@+id/img0"
-            android:layout_width="76dp"
-            android:layout_height="56dp"
-            android:layout_gravity="center_vertical"
-            android:padding="15dp"
-            android:src="@drawable/i_contrast" />
-
-        <SeekBar
-            android:id="@+id/sbFilter"
+        <LinearLayout
+            android:id="@+id/seekbar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginRight="20dp"
-            android:padding="8dp"
-            android:progress="41" />
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="76dp"
+                    android:layout_height="56dp"
+                    android:layout_gravity="center_vertical"
+                    android:padding="15dp"
+                    android:src="@drawable/i_contrast" />
+
+                <SeekBar
+                    android:id="@+id/sb_block"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="20dp"
+                    android:padding="8dp"
+                    android:progress="9" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="76dp"
+                    android:layout_height="56dp"
+                    android:layout_gravity="center_vertical"
+                    android:padding="15dp"
+                    android:src="@drawable/i_contrast" />
+
+                <SeekBar
+                    android:id="@+id/sb_constant"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="20dp"
+                    android:padding="8dp"
+                    android:progress="41" />
+            </LinearLayout>
+        </LinearLayout>
+
     </LinearLayout>
 
 
