@@ -19,9 +19,11 @@ import androidx.core.content.FileProvider;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -30,6 +32,9 @@ import com.MainApplication;
 //import com.google.android.gms.ads.AdListener;
 //import com.google.android.gms.ads.AdRequest;
 //import com.google.android.gms.ads.AdView;
+import com.github.angads25.toggle.interfaces.OnToggledListener;
+import com.github.angads25.toggle.model.ToggleableView;
+import com.github.angads25.toggle.widget.LabeledSwitch;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
@@ -38,6 +43,13 @@ import com.camv1.pdf.and.doc.india.scanner.Config.AdsTask;
 import com.camv1.pdf.and.doc.india.scanner.activities.SimpleDocumentScannerActivity;
 import com.cam.pdf.and.doc.india.scanner.R;
 import com.camv2.pdf.and.doc.india.scanner.AccountActivity;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +70,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String pathCamera = null;
     private AdsTask adsTask;
     private LinearLayout llAds;
-    int p=0;
+    int p = 0;
+    GoogleSignInClient mGoogleSignInClient;
+    GoogleSignInAccount account;
+
+    String token;
+    public static final int RC_SIGN_IN = 1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     InterstitialAd mInterstitialAd;
+
     private void initAds() {
 //        MobileAds.initialize(this, getResources().getString(R.string.admod_app_id));
 
@@ -91,14 +109,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onAdClosed() {
                 // Load the next interstitial.
-                if (p==1){
+                if (p == 1) {
                     startActivity(new Intent(MainActivity.this, DocsActivity.class));
-                }else if (p==2){
+                } else if (p == 2) {
                     startActivity(new Intent(MainActivity.this, MyPDFActivity.class));
-                }else if (p==3){
+                } else if (p == 3) {
                     getSharedPreferences("BVH", MODE_PRIVATE).edit().putInt("type", 1).commit();
                     SimpleDocumentScannerActivity.startScanner(MainActivity.this, "", "");
-                }else if(p==4){
+                } else if (p == 4) {
                     callCamera();
                 }
                 mInterstitialAd.loadAd(new AdRequest.Builder().build());
@@ -118,7 +136,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         cvFromGallery = (CardView) findViewById(R.id.cvFromGallery);
         cvGallery = (CardView) findViewById(R.id.cvGallery);
         cvPDF = (CardView) findViewById(R.id.cvPDF);
+        LabeledSwitch labeledSwitch = findViewById(R.id.sync_drive);
+        labeledSwitch.setOnToggledListener(new OnToggledListener() {
+            @Override
+            public void onSwitched(ToggleableView toggleableView, boolean isOn) {
+                if (isOn) {
+                    signIn();
+                } else {
+                    signOut();
+                }
+            }
+        });
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
 
+        /*In order to access files in drive the scope of the permission has to be specified.
+        More info on scope is available in Google Drive Api Documentation*/
+
+        mGoogleSignInClient = GoogleSignIn.getClient(MainActivity.this, gso);
+
+        account = GoogleSignIn.getLastSignedInAccount(MainActivity.this);
+        // If already signed in with the app it can be obtained here
+
+        if (account == null) {
+            Toast.makeText(getApplicationContext(),
+                    "You Need To Sign In First", Toast.LENGTH_SHORT).show();
+        }
+        if (account != null) {
+//            Intent intent = new Intent(MainActivity.this,DriveActivity.class);
+//            intent.putExtra("ACCOUNT",account);
+//            startActivity(intent);
+        }
         cvCamera.setOnClickListener(this);
         cvFromGallery.setOnClickListener(this);
         cvGallery.setOnClickListener(this);
@@ -180,10 +229,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);*/
                 if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
 
-                    if(mInterstitialAd.isLoaded() && mInterstitialAd!=null){
-                        p=4;
+                    if (mInterstitialAd.isLoaded() && mInterstitialAd != null) {
+                        p = 4;
                         mInterstitialAd.show();
-                    }else {
+                    } else {
                         callCamera();
                     }
 
@@ -193,11 +242,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.cvFromGallery:
-                if(mInterstitialAd.isLoaded() && mInterstitialAd!=null)
-                {
-                    p=3;
+                if (mInterstitialAd.isLoaded() && mInterstitialAd != null) {
+                    p = 3;
                     mInterstitialAd.show();
-                }else {
+                } else {
                     getSharedPreferences("BVH", MODE_PRIVATE).edit().putInt("type", 1).commit();
                     SimpleDocumentScannerActivity.startScanner(MainActivity.this, "", "");
                 }
@@ -208,18 +256,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                startActivity(iG);
                 break;
             case R.id.cvGallery:
-                if(mInterstitialAd.isLoaded() && mInterstitialAd!=null){
-                    p=1;
+                if (mInterstitialAd.isLoaded() && mInterstitialAd != null) {
+                    p = 1;
                     mInterstitialAd.show();
-                }else {
+                } else {
                     startActivity(new Intent(MainActivity.this, DocsActivity.class));
                 }
                 break;
             case R.id.cvPDF:
-                if(mInterstitialAd.isLoaded() && mInterstitialAd!=null){
-                    p=2;
+                if (mInterstitialAd.isLoaded() && mInterstitialAd != null) {
+                    p = 2;
                     mInterstitialAd.show();
-                }else {
+                } else {
                     startActivity(new Intent(MainActivity.this, MyPDFActivity.class));
                 }
 
@@ -275,6 +323,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } else {
                 Toast.makeText(this, getString(R.string.file_not_found), Toast.LENGTH_SHORT).show();
             }
+        }
+        if (requestCode == RC_SIGN_IN) {
+            // The Task returned from this call is always completed, no need to attach
+            // a listener.
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
+//            Intent intent = new Intent(this,DriveActivity.class);
+//            intent.putExtra("ACCOUNT",account);
+//            startActivity(intent);
+
         }
     }
 
@@ -341,5 +399,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (ActivityNotFoundException anfe) {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/developer?id=" + appPackageName)));
         }
+    }
+
+    private void signIn() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            account = completedTask.getResult(ApiException.class);
+
+            // Signed in successfully, show authenticated UI.
+
+            Log.e("Check", account.getEmail() + account.getGivenName() + account.getFamilyName());
+            // If successful you can obtain the account info using the getter methods
+        } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
+            Log.e("Sign-In", "signInResult:failed code=" + e.getStatusCode() + e);
+            Toast.makeText(getApplicationContext(),
+                    "Sign In Failed.Try again Later", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void signOut() {
+        mGoogleSignInClient.signOut()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Toast.makeText(getApplicationContext(),
+                                "Signed Out", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

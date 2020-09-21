@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "591198551021",
+    "firebase_url": "https://camscanner-india.firebaseio.com",
+    "project_id": "camscanner-india",
+    "storage_bucket": "camscanner-india.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:591198551021:android:ffcc224c03b87c880085e4",
+        "android_client_info": {
+          "package_name": "com.cam.pdf.and.doc.india.scanner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "591198551021-04p4n2ltf98boc1s9vh2kucbae68255i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlv-lmQ-C1IOd2SPtwMtob4f0qOZNd2NE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "591198551021-04p4n2ltf98boc1s9vh2kucbae68255i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
