@@ -31,6 +31,12 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.cam.pdf.and.doc.india.scanner.R;
 import com.camv1.pdf.and.doc.india.scanner.Config.AdsTask;
+import com.camv1.pdf.and.doc.india.scanner.document.DocumentActivity;
+import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveApi;
+import com.google.android.gms.drive.query.Filters;
+import com.google.android.gms.drive.query.Query;
+import com.google.android.gms.drive.query.SearchableField;
 import com.gun0912.tedpicker.ImagePickerActivity;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
@@ -245,7 +251,7 @@ public class MyPDFActivity extends AppCompatActivity implements SwipeRefreshLayo
                         positionOfPageSize = spinnerPageSize.getSelectedItemPosition();
                         positionOfImageScale = spinnerImageScale.getSelectedItemPosition();
 
-                        String tem=path + filename + ".pdf";
+                        String tem = path + filename + ".pdf";
                         // creating PDF
                         if (!new File(tem).exists()) {
                             new creatingPDF().execute();
@@ -298,7 +304,8 @@ public class MyPDFActivity extends AppCompatActivity implements SwipeRefreshLayo
         protected String doInBackground(String... params) {
             path = path + filename + ".pdf";
             Log.v("stage 1", "store the pdf in sd card");
-
+            DocumentActivity.path = path;
+            DocumentActivity.fileName = filename;
             Document document = new Document(PAGE_SIZE_VALUE.get(positionOfPageSize), 38, 38, 50, 38);
 
             Log.v("stage 2", "Document Created");
@@ -356,7 +363,7 @@ public class MyPDFActivity extends AppCompatActivity implements SwipeRefreshLayo
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             dialog.dismiss();
-
+            DocumentActivity.pdfComplete = "true";
 //            autoEmail.sendEmailPdf(path);
 //            autoNextCloud.uploadFilePdf(path);
 
@@ -372,4 +379,6 @@ public class MyPDFActivity extends AppCompatActivity implements SwipeRefreshLayo
         super.onRestart();
         adsTask.showInterstitialAds();
     }
+
+
 }

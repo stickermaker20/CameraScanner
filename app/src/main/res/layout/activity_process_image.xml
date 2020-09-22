@@ -62,7 +62,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginRight="20dp"
                     android:padding="8dp"
-                    android:progress="9" />
+                    android:progress="21" />
             </LinearLayout>
 
             <LinearLayout
@@ -84,7 +84,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginRight="20dp"
                     android:padding="8dp"
-                    android:progress="41" />
+                    android:progress="9" />
             </LinearLayout>
         </LinearLayout>
 

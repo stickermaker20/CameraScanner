@@ -63,9 +63,7 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
     LinearLayout seekbar_layout;
     @BindView(R.id.imgView2)
     public ImageView imageView;
-    @BindView(R.id.sb_constant)
     SeekBar sb_constant;
-    @BindView(R.id.sb_block)
     SeekBar sb_block;
     private IProcessPresenter presenter;
     private ProcessAdapter adapter;
@@ -73,8 +71,8 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
     public static Bitmap bitMapSource;
     private String folderPath;
     private static int REQUEST_SIGN = 1;
-    int blockvalue = 9;
-    int constantvalue = 41;
+    int blockvalue = 21;
+    int constantvalue = 9;
     private Styler styler;
     AdsTask adsTask;
     Handler bitmaphandler;
@@ -97,6 +95,8 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
         List<FilterModel> lst = presenter.getListModel();
         adapter.loadData(lst);
         styler.setMode(lst.get(0).getMode()).updateStyle();
+        sb_constant = findViewById(R.id.sb_constant);
+        sb_block = findViewById(R.id.sb_block);
         sb_block.setOnSeekBarChangeListener(this);
         sb_constant.setOnSeekBarChangeListener(this);
         bitmaphandler = new Handler();
@@ -203,37 +203,56 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
     public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
         if (fromUser) {
             Bitmap mResult = null;
-            Log.d("ThresholdChecker", "" + progress);
             Mat imageMat = new Mat();
             Utils.bitmapToMat(bitmap, imageMat);
             switch (bar.getId()) {
                 case R.id.sb_block:
                     if (progress < 10) {
                         blockvalue = 5;
-                    } else if (progress < 20) {
+                    } else if (progress < 15) {
                         blockvalue = 7;
-                    } else if (progress < 30) {
+                    } else if (progress < 20) {
                         blockvalue = 9;
-                    } else if (progress < 40) {
+                    } else if (progress < 25) {
                         blockvalue = 11;
-                    } else if (progress < 50) {
+                    } else if (progress < 30) {
                         blockvalue = 13;
-                    } else if (progress < 60) {
+                    } else if (progress < 35) {
                         blockvalue = 15;
-                    } else if (progress < 70) {
+                    } else if (progress < 40) {
                         blockvalue = 17;
-                    } else if (progress < 80) {
+                    } else if (progress < 45) {
                         blockvalue = 19;
-                    } else if (progress < 90) {
+                    } else if (progress < 50) {
                         blockvalue = 21;
-                    } else if (progress < 101) {
+                    } else if (progress < 55) {
                         blockvalue = 23;
+                    } else if (progress < 60) {
+                        blockvalue = 25;
+                    } else if (progress < 65) {
+                        blockvalue = 27;
+                    } else if (progress < 70) {
+                        blockvalue = 29;
+                    } else if (progress < 75) {
+                        blockvalue = 31;
+                    } else if (progress < 80) {
+                        blockvalue = 35;
+                    } else if (progress < 85) {
+                        blockvalue = 37;
+                    } else if (progress < 90) {
+                        blockvalue = 39;
+                    } else if (progress < 95) {
+                        blockvalue = 41;
+                    } else if (progress < 101) {
+                        blockvalue = 43;
                     }
+                    Log.d("ThresholdChecker", "Block Value" + blockvalue);
                     mResult = applyThreshold(imageMat);
                     imageView.setImageBitmap(mResult);
                     break;
 
                 case R.id.sb_constant:
+                    Log.d("ThresholdChecker", "Constant Value" + progress);
                     constantvalue = progress;
                     mResult = applyThreshold(imageMat);
                     imageView.setImageBitmap(mResult);
@@ -304,7 +323,7 @@ public class ProcessImageActivity extends BaseActivity implements IProcessView, 
     private Bitmap applyThreshold(Mat src) {
 
         Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.adaptiveThreshold(src, src, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, blockvalue, constantvalue);
+        Imgproc.adaptiveThreshold(src, src, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 1 * blockvalue, 1 * constantvalue);
         Imgproc.threshold(src, src, 0, 255, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU);
 
         Bitmap bm = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888);

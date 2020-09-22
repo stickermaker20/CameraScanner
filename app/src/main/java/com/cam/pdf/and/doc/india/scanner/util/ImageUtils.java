@@ -161,6 +161,7 @@ public class ImageUtils {
         @Override
         protected String doInBackground(String... params) {
             path = params[0];
+            DocumentActivity.path = path;
             Log.v("stage 1", "store the pdf in sd card");
 
             Document document = new Document(PAGE_SIZE_VALUE.get(positionOfPageSize), 38, 38, 50, 38);
@@ -170,7 +171,6 @@ public class ImageUtils {
 
             try {
                 PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(path));
-
                 Log.v("Stage 3", "Pdf writer");
                 document.open();
                 Log.v("Stage 4", "Document opened");
@@ -185,6 +185,7 @@ public class ImageUtils {
                         if (bmp.getWidth() > documentRect.getWidth() || bmp.getHeight() > documentRect.getHeight()) {
                             //bitmap is larger than page,so set bitmap's size similar to the whole page
                             image.scaleToFit(documentRect.getWidth(), documentRect.getHeight());
+
                         } else {
                             //bitmap is smaller than page, so add bitmap simply.[note: if you want to fill page by stretching image, you may set size similar to page as above]
                             image.scaleToFit(bmp.getWidth(), bmp.getHeight());
@@ -217,11 +218,11 @@ public class ImageUtils {
 
         @Override
         protected void onPostExecute(String s) {
+            DocumentActivity.pdfComplete = "true";
             if (((Activity) context).isFinishing()) {
                 return;
             }
             dialog.dismiss();
-
             builder = new MaterialDialog.Builder(context)
                     .title("File name")
                     .content(new File(path).getName())

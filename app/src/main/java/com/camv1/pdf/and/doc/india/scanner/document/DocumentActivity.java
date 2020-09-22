@@ -1,25 +1,21 @@
 package com.camv1.pdf.and.doc.india.scanner.document;
 
 import android.Manifest;
+import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.view.menu.MenuBuilder;
-import androidx.appcompat.view.menu.MenuPopupHelper;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.appcompat.widget.PopupMenu;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -31,34 +27,61 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.appcompat.view.menu.MenuPopupHelper;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-
-import com.github.clans.fab.FloatingActionButton;
 import com.cam.pdf.and.doc.india.scanner.DynamicAdapter;
 import com.cam.pdf.and.doc.india.scanner.OnChangeDynamic;
 import com.cam.pdf.and.doc.india.scanner.OnLongClickItem;
+import com.cam.pdf.and.doc.india.scanner.R;
 import com.cam.pdf.and.doc.india.scanner.base.BaseActivity;
+import com.cam.pdf.and.doc.india.scanner.camscanner.MainActivity;
 import com.cam.pdf.and.doc.india.scanner.util.Const;
 import com.cam.pdf.and.doc.india.scanner.util.ImageUtils;
 import com.camv1.pdf.and.doc.india.scanner.Config.AdsTask;
 import com.camv1.pdf.and.doc.india.scanner.activities.SimpleDocumentScannerActivity;
 import com.camv1.pdf.and.doc.india.scanner.handle.HandleActivity;
-import com.cam.pdf.and.doc.india.scanner.R;
+import com.github.clans.fab.FloatingActionButton;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.client.http.FileContent;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
 
 import org.askerov.dynamicgrid.DynamicGridView;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 import static com.camv1.pdf.and.doc.india.scanner.PresenterScanner.FOLDER_NAME;
 
 
-public class DocumentActivity extends BaseActivity implements DocumentContract.DocumentView, OnLongClickItem, OnChangeDynamic {
+public class DocumentActivity extends BaseActivity implements DocumentContract.DocumentView, OnLongClickItem, OnChangeDynamic, EasyPermissions.PermissionCallbacks {
     private DocumentContract.IDocumentPresenter presenter;
     private DocumentAdapter adapter;
     private DynamicAdapter dynamicAdapter;
@@ -92,6 +115,25 @@ public class DocumentActivity extends BaseActivity implements DocumentContract.D
     private int REQUEST_CAMERA_PERMISSION = 201;
     boolean isSave = false;
     private AdsTask adsTask;
+
+    //Upload File to Google Drive
+
+    GoogleAccountCredential mCredential = null;
+    static final int REQUEST_ACCOUNT_PICKER = 1000;
+    static final int REQUEST_AUTHORIZATION = 1001;
+    static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
+    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+    private static final String[] SCOPES = {DriveScopes.DRIVE};
+    private static final String PREF_ACCOUNT_NAME = "accountName";
+    GoogleSignInAccount account;
+    //  private ProgressBar mProgressBar;
+    private int calledFrom = 0;
+    java.io.File file2;
+    public static String path;
+    Handler driveHandler;
+    Runnable driveRunnable;
+    public static String pdfComplete = "false";
+    public static String fileName = "";
 
     @Override
     protected int getLayoutRes() {
@@ -129,7 +171,9 @@ public class DocumentActivity extends BaseActivity implements DocumentContract.D
             tvName.setText(file.getName());
         }
 
-
+        mCredential = GoogleAccountCredential.usingOAuth2(
+                getApplicationContext(), Arrays.asList(SCOPES))
+                .setBackOff(new ExponentialBackOff());
     }
 
     @Override
@@ -166,7 +210,6 @@ public class DocumentActivity extends BaseActivity implements DocumentContract.D
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == REQUEST_IMPORT && resultCode == RESULT_OK) {
 //            Log.e("bvh", data.toString());
 //            adapter.loadData(presenter.getListDocument(folder));
@@ -208,6 +251,33 @@ public class DocumentActivity extends BaseActivity implements DocumentContract.D
                 imgDone.setVisibility(View.GONE);
                 imgMenu.setVisibility(View.VISIBLE);
                 Toast.makeText(this, getString(R.string.file_not_found), Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == REQUEST_GOOGLE_PLAY_SERVICES) {
+            if (resultCode != RESULT_OK) {
+                Log.e(this.toString(), "This app requires Google Play Services. Please install " +
+                        "Google Play Services on your device and relaunch this app.");
+
+            } else {
+                getResultsFromApi();
+            }
+        } else if (requestCode == REQUEST_ACCOUNT_PICKER) {
+            if (resultCode == RESULT_OK && data != null &&
+                    data.getExtras() != null) {
+                String accountName =
+                        data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                if (accountName != null) {
+                    SharedPreferences settings =
+                            getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putString(PREF_ACCOUNT_NAME, accountName);
+                    editor.apply();
+                    mCredential.setSelectedAccountName(accountName);
+                    getResultsFromApi();
+                }
+            }
+        } else if (requestCode == REQUEST_AUTHORIZATION) {
+            if (resultCode == RESULT_OK) {
+                getResultsFromApi();
             }
         }
 //
@@ -252,7 +322,7 @@ public class DocumentActivity extends BaseActivity implements DocumentContract.D
             List<Object> arrModel = dynamicAdapter.getItems();
             int po = 0;
             for (int i = 0; i < arrModel.size(); i++) {
-               DocumentModel documentModel = (DocumentModel) arrModel.get(i);
+                DocumentModel documentModel = (DocumentModel) arrModel.get(i);
                 String path = documentModel.getPath();
 
                 int index = path.lastIndexOf(File.separator);
@@ -344,6 +414,7 @@ public class DocumentActivity extends BaseActivity implements DocumentContract.D
 //                        presenter.shareFile(getDefaultName() + "/" + tvName.getText().toString() + ".pdf");
 //                        break;
                     case R.id.menuSaveToPDF:
+                        Log.d("PDFUplaodChecker", "button pressed");
                         String pdfName = file.getName() + System.currentTimeMillis() + ".pdf";
                         List<String> myPath = new ArrayList<>();
                         List<Object> arrModel = dynamicAdapter.getItems();
@@ -352,6 +423,27 @@ public class DocumentActivity extends BaseActivity implements DocumentContract.D
                             myPath.add(documentModel.getPath());
                         }
                         ImageUtils.convertImageToPdf(myPath, folder + "/" + pdfName, DocumentActivity.this);
+                        path = folder + "/" + pdfName;
+                        fileName = pdfName;
+                        if (MainActivity.drive_check.equals("true")) {
+                            Log.d("PDFUplaodChecker", "Sync Enable");
+                            driveHandler = new Handler();
+                            driveRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (pdfComplete.equals("true")) {
+                                        Log.d("PDFUplaodChecker", "PDF Create Done");
+                                        calledFrom = 2;
+                                        pdfComplete = "false";
+                                        getResultsFromApi();
+                                        new DocumentActivity.MakeDriveRequestTask2(mCredential, DocumentActivity.this).execute();
+                                    } else {
+                                        driveHandler.postDelayed(driveRunnable, 500);
+                                    }
+                                }
+                            };
+                            driveHandler.post(driveRunnable);
+                        }
                         break;
                     case R.id.menuDelete:
                         if (file.exists()) {
@@ -438,11 +530,31 @@ public class DocumentActivity extends BaseActivity implements DocumentContract.D
     public void onDone() {
         String filePdfName = editName.getText().toString();
         presenter.reName(filePdfName);
+        fileName = filePdfName;
         Const.hideKeyboardFrom(DocumentActivity.this, editName);
         imgDone.setVisibility(View.GONE);
         editName.setVisibility(View.GONE);
         tvName.setVisibility(View.VISIBLE);
         imgMenu.setVisibility(View.VISIBLE);
+        if (MainActivity.drive_check.equals("true")) {
+            Log.d("PDFUplaodChecker", "Sync Enable");
+            driveHandler = new Handler();
+            driveRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (pdfComplete.equals("true")) {
+                        Log.d("PDFUplaodChecker", "PDF Create Done");
+                        calledFrom = 2;
+                        pdfComplete = "false";
+                        getResultsFromApi();
+                        new DocumentActivity.MakeDriveRequestTask2(mCredential, DocumentActivity.this).execute();
+                    } else {
+                        driveHandler.postDelayed(driveRunnable, 500);
+                    }
+                }
+            };
+            driveHandler.post(driveRunnable);
+        }
 
     }
 
@@ -509,5 +621,220 @@ public class DocumentActivity extends BaseActivity implements DocumentContract.D
     protected void onDestroy() {
         super.onDestroy();
     }
+
+    public void getResultsFromApi() {
+        if (!isGooglePlayServicesAvailable()) {
+            acquireGooglePlayServices();
+        } else if (mCredential.getSelectedAccountName() == null) {
+            chooseAccount();
+        } else if (!isDeviceOnline()) {
+
+            Toast.makeText(getApplicationContext(),
+                    "No Network Connection Available", Toast.LENGTH_SHORT).show();
+            Log.e(this.toString(), "No network connection available.");
+        } else {
+            //if everything is Ok
+            if (calledFrom == 2) {
+                new DocumentActivity.MakeDriveRequestTask2(mCredential, DocumentActivity.this).execute();//upload q and responses xlsx files
+            }
+
+        }
+    }
+
+    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
+    private void chooseAccount() {
+        if (EasyPermissions.hasPermissions(
+                this, android.Manifest.permission.GET_ACCOUNTS)) {
+            String accountName = getPreferences(Context.MODE_PRIVATE)
+                    .getString(PREF_ACCOUNT_NAME, null);
+            if (accountName != null) {
+                mCredential.setSelectedAccountName(accountName);
+                getResultsFromApi();
+            } else {
+                // Start a dialog from which the user can choose an account
+                startActivityForResult(
+                        mCredential.newChooseAccountIntent(),
+                        REQUEST_ACCOUNT_PICKER);
+            }
+        } else {
+            // Request the GET_ACCOUNTS permission via a user dialog
+            EasyPermissions.requestPermissions(
+                    this,
+                    "This app needs to access your Google account (via Contacts).",
+                    REQUEST_PERMISSION_GET_ACCOUNTS,
+                    android.Manifest.permission.GET_ACCOUNTS);
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(
+                requestCode, permissions, grantResults, this);
+    }
+
+
+    @Override
+    public void onPermissionsGranted(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+
+    @Override
+    public void onPermissionsDenied(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+
+    private boolean isDeviceOnline() {
+        ConnectivityManager connMgr =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        Log.e(this.toString(), "Checking if device");
+        return (networkInfo != null && networkInfo.isConnected());
+
+    }
+
+    private boolean isGooglePlayServicesAvailable() {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
+        final int connectionStatusCode =
+                apiAvailability.isGooglePlayServicesAvailable(this);
+        return connectionStatusCode == ConnectionResult.SUCCESS;
+    }
+
+    private void acquireGooglePlayServices() {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
+        final int connectionStatusCode =
+                apiAvailability.isGooglePlayServicesAvailable(this);
+        if (apiAvailability.isUserResolvableError(connectionStatusCode)) {
+            showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
+        }
+    }
+
+    void showGooglePlayServicesAvailabilityErrorDialog(
+            final int connectionStatusCode) {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        Dialog dialog = apiAvailability.getErrorDialog(
+                DocumentActivity.this,
+                connectionStatusCode,
+                REQUEST_GOOGLE_PLAY_SERVICES);
+        dialog.show();
+    }
+
+    private class MakeDriveRequestTask2 extends AsyncTask<Void, Void, List<String>> {
+        private Drive mService = null;
+        private Exception mLastError = null;
+        private Context mContext;
+
+
+        MakeDriveRequestTask2(GoogleAccountCredential credential, Context context) {
+
+            mContext = context;
+            HttpTransport transport = AndroidHttp.newCompatibleTransport();
+            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            mService = new Drive.Builder(
+                    transport, jsonFactory, credential)
+                    .setApplicationName("UsingDriveJavaApi")
+                    .build();
+            // TODO change the application name to the name of your applicaiton
+        }
+
+        @Override
+        protected List<String> doInBackground(Void... params) {
+            Log.d("PDFUplaodChecker", "doinBackground");
+
+            try {
+                uploadFile();
+            } catch (Exception e) {
+                e.printStackTrace();
+                mLastError = e;
+
+                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
+                    showGooglePlayServicesAvailabilityErrorDialog(
+                            ((GooglePlayServicesAvailabilityIOException) mLastError)
+                                    .getConnectionStatusCode());
+                } else if (mLastError instanceof UserRecoverableAuthIOException) {
+
+                    startActivityForResult(
+                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
+                            DocumentActivity.REQUEST_AUTHORIZATION);
+                } else {
+                    Log.e(this.toString(), "The following error occurred:\n" + mLastError.getMessage());
+                }
+                Log.e(this.toString(), e + "");
+            }
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            //   mProgressBar.setVisibility(View.VISIBLE);
+
+        }
+
+        @Override
+        protected void onPostExecute(List<String> output) {
+            // mProgressBar.setVisibility(View.GONE);
+        }
+
+        @Override
+        protected void onCancelled() {
+            // mProgressBar.setVisibility(View.GONE);
+            if (mLastError != null) {
+                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
+                    showGooglePlayServicesAvailabilityErrorDialog(
+                            ((GooglePlayServicesAvailabilityIOException) mLastError)
+                                    .getConnectionStatusCode());
+                } else if (mLastError instanceof UserRecoverableAuthIOException) {
+
+                    startActivityForResult(
+                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
+                            DocumentActivity.REQUEST_AUTHORIZATION);
+                } else {
+                    Toast.makeText(DocumentActivity.this, "The following error occurred:\n" + mLastError.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(DocumentActivity.this, "Request cancelled.", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        private void uploadFile() throws IOException {
+            com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
+            if (fileName.equals("")) {
+                fileMetadata.setName("CamScanner India Document" + new Date());
+            } else {
+                fileMetadata.setName(fileName);
+            }
+
+            // For mime type of specific file visit Drive Doucumentation
+
+            file2 = new java.io.File(path);
+            //   InputStream inputStream = getResources().openRawResource(R.raw.template);
+//            try {
+//                FileUtils.copyInputStreamToFile(inputStream, file2);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+            Log.d("PDFUplaodChecker", "inside upload file, File Name: " + fileName + " \nPath: " + path);
+
+            FileContent mediaContent = new FileContent("application/pdf", file2);
+
+            com.google.api.services.drive.model.File file = mService.files().create(fileMetadata, mediaContent).execute();
+
+            Log.e(this.toString(), "File Created with ID:" + file.getId());
+
+            Toast.makeText(getApplicationContext(), "Sync to Google Drive Successful:" + file.getId(), Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+
 }
 

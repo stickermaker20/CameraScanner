@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
+import com.camv1.pdf.and.doc.india.scanner.document.DocumentActivity;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.cam.pdf.and.doc.india.scanner.util.ImageUtils;
 import com.cam.pdf.and.doc.india.scanner.util.PathUtil;

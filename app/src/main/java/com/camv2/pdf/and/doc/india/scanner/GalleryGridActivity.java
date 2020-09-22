@@ -13,10 +13,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,6 +35,7 @@ import com.afollestad.dragselectrecyclerview.DragSelectRecyclerView;
 import com.afollestad.dragselectrecyclerview.DragSelectRecyclerViewAdapter;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.camv1.pdf.and.doc.india.scanner.document.DocumentActivity;
 import com.gun0912.tedpicker.ImagePickerActivity;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
@@ -525,8 +528,8 @@ public class GalleryGridActivity extends AppCompatActivity
         protected String doInBackground(String... params) {
             path = path + filename + ".pdf";
             Log.v("stage 1", "store the pdf in sd card");
-
-
+            DocumentActivity.path = path;
+            DocumentActivity.fileName = filename;
             Document document = new Document(PAGE_SIZE_VALUE.get(positionOfPageSize), 38, 38, 50, 38);
 
 
@@ -585,6 +588,7 @@ public class GalleryGridActivity extends AppCompatActivity
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             dialog.dismiss();
+            DocumentActivity.pdfComplete = "true";
 
 //            autoEmail.sendEmailPdf(path);
 //            autoNextCloud.uploadFilePdf(path);

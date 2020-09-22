@@ -73,9 +73,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int p = 0;
     GoogleSignInClient mGoogleSignInClient;
     GoogleSignInAccount account;
-
+    public static String drive_check = "false";
     String token;
-    public static final int RC_SIGN_IN = 1;
+    public static final int RC_SIGN_IN = 420;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,12 +85,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Obtain the shared Tracker instance.
         MainApplication application = (MainApplication) getApplication();
 
-        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             initView();
 
 //            initBannerAds();
         } else {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_STORAGE);
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE);
         }
         initAds();
 
@@ -141,8 +141,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onSwitched(ToggleableView toggleableView, boolean isOn) {
                 if (isOn) {
+                    drive_check = "true";
                     signIn();
                 } else {
+                    drive_check = "false";
                     signOut();
                 }
             }
@@ -158,12 +160,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         account = GoogleSignIn.getLastSignedInAccount(MainActivity.this);
         // If already signed in with the app it can be obtained here
-
-        if (account == null) {
-            Toast.makeText(getApplicationContext(),
-                    "You Need To Sign In First", Toast.LENGTH_SHORT).show();
-        }
+//
+//        if (account == null) {
+//            Toast.makeText(getApplicationContext(), "You Need To Sign In First", Toast.LENGTH_SHORT).show();
+//        }
         if (account != null) {
+            drive_check = "true";
 //            Intent intent = new Intent(MainActivity.this,DriveActivity.class);
 //            intent.putExtra("ACCOUNT",account);
 //            startActivity(intent);
@@ -180,11 +182,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_STORAGE) {
-            if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 initView();
 //                initBannerAds();
             } else {
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_STORAGE);
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE);
             }
         }
         if (requestCode == REQUEST_CAMERA_PERMISSION) {

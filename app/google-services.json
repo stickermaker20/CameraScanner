@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "591198551021-glp7poccpjeadauk18g70es4bsnpsn5j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cam.pdf.and.doc.india.scanner",
+            "certificate_hash": "dc2b36e7469b3fd70fdb270fcb78f6623e7ae063"
+          }
+        },
+        {
           "client_id": "591198551021-04p4n2ltf98boc1s9vh2kucbae68255i.apps.googleusercontent.com",
           "client_type": 3
         }
