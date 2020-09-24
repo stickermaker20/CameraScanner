@@ -22,18 +22,18 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
+//
+//    buildTypes {
+//        release {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//        }
+//
+//        debug {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//        }
+//    }
 
     dexOptions {
         javaMaxHeapSize "4g"
@@ -43,12 +43,12 @@ android {
     dataBinding {
         enabled = true
     }
-    lintOptions {
-        checkReleaseBuilds false
-        // Or, if you prefer, you can continue to check for errors in release builds,
-        // but continue the build even when errors are found:
-        abortOnError false
-    }
+//    lintOptions {
+//        checkReleaseBuilds false
+//        // Or, if you prefer, you can continue to check for errors in release builds,
+//        // but continue the build even when errors are found:
+//        abortOnError false
+//    }
     configurations {
         all {
             exclude module: 'httpclient'
@@ -104,8 +104,8 @@ dependencies {
 
     implementation 'androidx.multidex:multidex:2.0.0'
     //Auto mail
-    implementation 'com.github.yesidlazaro:GmailBackground:1.2.0'
-    implementation 'com.github.nextcloud:android-library:-SNAPSHOT'
+    //implementation 'com.github.yesidlazaro:GmailBackground:1.2.0'
+   // implementation 'com.github.nextcloud:android-library:-SNAPSHOT'
     //filter_image
     implementation 'it.chengdazhi.styleimageview:styleimageview:1.0.4'
     //photoview
