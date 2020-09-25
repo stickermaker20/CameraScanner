@@ -6,7 +6,7 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_sync"
-            android:icon="@drawable/on"
+            android:icon="@drawable/drive"
             android:title="Drive Sync" />
 
         <item
@@ -14,24 +14,28 @@
             android:icon="@drawable/rate"
             android:title="Rate" />
         <item
-            android:icon="@drawable/i_share"
             android:id="@+id/nav_share"
+            android:icon="@drawable/i_share"
             android:title="Share" />
         <item
-            android:icon="@drawable/edit_photo_mail"
             android:id="@+id/nav_contact"
+            android:icon="@drawable/edit_photo_mail"
             android:title="Contact Us" />
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/close"
+            android:title="Logout" />
     </group>
 
-<!--    <item android:title="Others">-->
-<!--        <menu>-->
-<!--            <item-->
-<!--                android:id="@+id/nav_logout"-->
-<!--                android:title="Logout" />-->
-<!--            <item-->
-<!--                android:id="@+id/nav_exit"-->
-<!--                android:title="Exit" />-->
-<!--        </menu>-->
-<!--    </item>-->
+    <!--    <item android:title="Others">-->
+    <!--        <menu>-->
+    <!--            <item-->
+    <!--                android:id="@+id/nav_logout"-->
+    <!--                android:title="Logout" />-->
+    <!--            <item-->
+    <!--                android:id="@+id/nav_exit"-->
+    <!--                android:title="Exit" />-->
+    <!--        </menu>-->
+    <!--    </item>-->
 
 </menu>

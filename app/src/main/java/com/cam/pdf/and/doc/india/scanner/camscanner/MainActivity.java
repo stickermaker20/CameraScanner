@@ -1,6 +1,8 @@
 package com.cam.pdf.and.doc.india.scanner.camscanner;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,9 +18,11 @@ import android.text.Html;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -32,13 +36,15 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.CustomDialogClass;
 import com.MainApplication;
 import com.MainFileAdapter;
 import com.cam.pdf.and.doc.india.scanner.R;
 import com.cam.pdf.and.doc.india.scanner.listdoc.DocsActivity;
 import com.camv1.pdf.and.doc.india.scanner.Config.AdsTask;
 import com.camv1.pdf.and.doc.india.scanner.activities.SimpleDocumentScannerActivity;
+import com.github.angads25.toggle.interfaces.OnToggledListener;
+import com.github.angads25.toggle.model.ToggleableView;
+import com.github.angads25.toggle.widget.LabeledSwitch;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
@@ -53,8 +59,6 @@ import com.google.android.material.navigation.NavigationView;
 import com.itextpdf.text.Image;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.leinardi.android.speeddial.SpeedDialView;
-
-import org.mortbay.jetty.Main;
 
 import java.io.File;
 import java.io.IOException;
@@ -651,7 +655,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 showMyDialouge();
                 break;
             case R.id.nav_sync:
-
+                CustomDialogClass cdd = new CustomDialogClass(MainActivity.this);
+                cdd.show();
+                break;
+            case R.id.nav_logout:
+                signOut();
                 break;
         }
 
@@ -659,4 +667,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    public class CustomDialogClass extends Dialog {
+        public Activity c;
+        public Dialog d;
+
+        public CustomDialogClass(Activity a) {
+            super(a);
+            // TODO Auto-generated constructor stub
+            this.c = a;
+        }
+
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+            setContentView(R.layout.custom_dialog);
+
+            LabeledSwitch labeledSwitch = findViewById(R.id.sync_drive);
+            labeledSwitch.setOnToggledListener(new OnToggledListener() {
+                @Override
+                public void onSwitched(ToggleableView toggleableView, boolean isOn) {
+                    if (isOn) {
+                        signIn();
+                        MainActivity.drive_check = "true";
+
+                    } else {
+                        MainActivity.drive_check = "false";
+                        signOut();
+                    }
+                    dismiss();
+
+                }
+            });
+        }
+    }
+
 }
