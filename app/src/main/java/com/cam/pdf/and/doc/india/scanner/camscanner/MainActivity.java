@@ -12,47 +12,36 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.text.Html;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.CustomDialogClass;
 import com.MainApplication;
-//import com.google.android.gms.ads.AdListener;
-//import com.google.android.gms.ads.AdRequest;
-//import com.google.android.gms.ads.AdView;
 import com.MainFileAdapter;
-import com.github.angads25.toggle.interfaces.OnToggledListener;
-import com.github.angads25.toggle.model.ToggleableView;
-import com.github.angads25.toggle.widget.LabeledSwitch;
-import com.github.clans.fab.FloatingActionButton;
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.InterstitialAd;
+import com.cam.pdf.and.doc.india.scanner.R;
 import com.cam.pdf.and.doc.india.scanner.listdoc.DocsActivity;
 import com.camv1.pdf.and.doc.india.scanner.Config.AdsTask;
 import com.camv1.pdf.and.doc.india.scanner.activities.SimpleDocumentScannerActivity;
-import com.cam.pdf.and.doc.india.scanner.R;
-import com.camv2.pdf.and.doc.india.scanner.AccountActivity;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -62,6 +51,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.itextpdf.text.Image;
+import com.leinardi.android.speeddial.SpeedDialActionItem;
+import com.leinardi.android.speeddial.SpeedDialView;
+
+import org.mortbay.jetty.Main;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,6 +65,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.camv1.pdf.and.doc.india.scanner.PresenterScanner.FOLDER_NAME;
+
+//import com.google.android.gms.ads.AdListener;
+//import com.google.android.gms.ads.AdRequest;
+//import com.google.android.gms.ads.AdView;
 
 
 /**
@@ -109,8 +106,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String filename;
     private String path;
 
-    FloatingActionButton fb_camera;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,14 +122,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!folder.exists()) {
             folder.mkdir();
         }
-        fb_camera = findViewById(R.id.fab_camera);
         // Initialize variables
         inFiles = new ArrayList<>();
         files = folder.listFiles();
         adapter = new MainFileAdapter(MainActivity.this, inFiles);
         listView.setAdapter(adapter);
         swipeView.setOnRefreshListener(this);
-        fb_camera.setOnClickListener(this);
         // Populate data into listView
         populateListView();
 
@@ -149,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setNavigationItemSelectedListener(MainActivity.this);
 
         MainApplication application = (MainApplication) getApplication();
 
@@ -161,6 +154,59 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE);
         }
         initAds();
+
+        final SpeedDialView speedDialView = findViewById(R.id.speedDial);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            speedDialView.addActionItem(
+                    new SpeedDialActionItem.Builder(R.id.fab_camera, R.drawable.fab_camera)
+                            .setLabelColor(Color.WHITE)
+                            .setFabBackgroundColor(Color.RED)
+                            .create());
+
+            speedDialView.addActionItem(
+                    new SpeedDialActionItem.Builder(R.id.fab_gallery, R.drawable.gallery)
+                            .setLabelColor(Color.WHITE)
+                            .setFabBackgroundColor(Color.BLUE)
+                            .create());
+        }
+
+        speedDialView.setOnActionSelectedListener(new SpeedDialView.OnActionSelectedListener() {
+            @Override
+            public boolean onActionSelected(SpeedDialActionItem speedDialActionItem) {
+                Log.d("SpeedDial", "Main before switch" + speedDialActionItem.getId());
+                switch (speedDialActionItem.getId()) {
+                    case R.id.speedDial:
+                        Log.d("SpeedDial", "Main Clicked");
+                        return false; // true to keep the Speed Dial open
+                    case R.id.fab_camera:
+                        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+
+                            if (mInterstitialAd.isLoaded() && mInterstitialAd != null) {
+                                p = 4;
+                                mInterstitialAd.show();
+                            } else {
+                                callCamera();
+                            }
+
+
+                        } else {
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+                        }
+                        return true;
+                    case R.id.fab_gallery:
+                        if (mInterstitialAd.isLoaded() && mInterstitialAd != null) {
+                            p = 3;
+                            mInterstitialAd.show();
+                        } else {
+                            getSharedPreferences("BVH", MODE_PRIVATE).edit().putInt("type", 1).commit();
+                            SimpleDocumentScannerActivity.startScanner(MainActivity.this, "", "");
+                        }
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
 
     }
 
@@ -204,19 +250,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         cvFromGallery = (CardView) findViewById(R.id.cvFromGallery);
         cvGallery = (CardView) findViewById(R.id.cvGallery);
         cvPDF = (CardView) findViewById(R.id.cvPDF);
-        LabeledSwitch labeledSwitch = findViewById(R.id.sync_drive);
-        labeledSwitch.setOnToggledListener(new OnToggledListener() {
-            @Override
-            public void onSwitched(ToggleableView toggleableView, boolean isOn) {
-                if (isOn) {
-                    drive_check = "true";
-                    signIn();
-                } else {
-                    drive_check = "false";
-                    signOut();
-                }
-            }
-        });
+//        LabeledSwitch labeledSwitch = findViewById(R.id.sync_drive);
+//        labeledSwitch.setOnToggledListener(new OnToggledListener() {
+//            @Override
+//            public void onSwitched(ToggleableView toggleableView, boolean isOn) {
+//                if (isOn) {
+//                    drive_check = "true";
+//                    signIn();
+//                } else {
+//                    drive_check = "false";
+//                    signOut();
+//                }
+//            }
+//        });
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -341,21 +387,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     startActivity(new Intent(MainActivity.this, MyPDFActivity.class));
                 }
                 break;
-            case R.id.fab_camera:
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-
-                    if (mInterstitialAd.isLoaded() && mInterstitialAd != null) {
-                        p = 4;
-                        mInterstitialAd.show();
-                    } else {
-                        callCamera();
-                    }
-
-
-                } else {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
-                }
-                break;
         }
     }
 
@@ -420,37 +451,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_settings) {
-            startActivity(new Intent(MainActivity.this, AccountActivity.class));
-            return true;
-        }
-        if (item.getItemId() == R.id.action_settings0) {
-            callSettings();
-            return true;
-        }
-        if (item.getItemId() == R.id.action_rate_app) {
-            rateApp();
-            return true;
-        }
-        if (item.getItemId() == R.id.action_share_app) {
-            shareApp();
-            return true;
-        }
-        if (item.getItemId() == R.id.action_more_app) {
-            moreApp();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        MenuInflater inflater = getMenuInflater();
+//        inflater.inflate(R.menu.menu_main, menu);
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        if (item.getItemId() == R.id.action_settings) {
+//            startActivity(new Intent(MainActivity.this, AccountActivity.class));
+//            return true;
+//        }
+//        if (item.getItemId() == R.id.action_settings0) {
+//            callSettings();
+//            return true;
+//        }
+//        if (item.getItemId() == R.id.action_rate_app) {
+//            rateApp();
+//            return true;
+//        }
+//        if (item.getItemId() == R.id.action_share_app) {
+//            shareApp();
+//            return true;
+//        }
+//        if (item.getItemId() == R.id.action_more_app) {
+//            moreApp();
+//            return true;
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 
     private void callSettings() {
         startActivity(new Intent(MainActivity.this, MySettingsActivity.class));
@@ -485,7 +516,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void signIn() {
+    public void signIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
@@ -562,8 +593,70 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+//
+//    @Override
+//    public boolean onNavigationItemSelected(MenuItem item) {
+//        Log.d("ItemID", "" + item.getItemId());
+//        switch (item.getItemId()) {
+//            case R.id.nav_rate:
+//                rateApp();
+//                break;
+//            case R.id.nav_share:
+//                shareApp();
+//                break;
+//            case R.id.nav_contact:
+//                showDialouge();
+//                break;
+//        }
+//
+//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        drawer.closeDrawer(GravityCompat.START);
+//        return true;
+//    }
+
+
+    public void showMyDialouge() {
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+        builder1.setTitle("Contact Us");
+        builder1.setMessage("newcreative2019@yahoo.com");
+        builder1.setCancelable(false);
+        builder1.setPositiveButton(
+                "Close",
+                new android.content.DialogInterface.OnClickListener() {
+                    public void onClick(android.content.DialogInterface dialog, int id) {
+                        dialog.cancel();
+
+                    }
+                });
+
+        AlertDialog alert11 = builder1.create();
+        try {
+            alert11.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-        return false;
+        Log.d("ItemID", "" + menuItem.getItemId());
+        switch (menuItem.getItemId()) {
+            case R.id.nav_rate:
+                rateApp();
+                break;
+            case R.id.nav_share:
+                shareApp();
+                break;
+            case R.id.nav_contact:
+                showMyDialouge();
+                break;
+            case R.id.nav_sync:
+
+                break;
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }

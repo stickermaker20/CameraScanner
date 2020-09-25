@@ -1,3 +1,0 @@
-org.askerov.dynamicgrid
-dimen dgv_overlap_if_switch_straight_line
-id dgv_wobble_tag

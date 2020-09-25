@@ -11,18 +11,6 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="@color/white"
-        android:fitsSystemWindows="true"
-        android:visibility="gone"
-        app:itemIconTint="@color/white"
-        app:itemTextColor="@color/white"
-        app:menu="@menu/activity_main_drawer" />
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -39,7 +27,6 @@
             android:id="@+id/main_swipe"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/drive_container"
             android:layout_below="@id/toolbar">
 
             <LinearLayout
@@ -56,38 +43,6 @@
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-        <ImageView
-            android:id="@+id/img_banner"
-            android:layout_width="match_parent"
-            android:layout_height="210dp"
-            android:layout_alignParentTop="true"
-            android:scaleType="fitXY"
-            android:src="@drawable/banner"
-            android:visibility="gone" />
-
-        <LinearLayout
-            android:id="@+id/drive_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/llMid"
-            android:layout_marginTop="7dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginRight="20sp"
-                android:src="@drawable/drive" />
-
-            <com.github.angads25.toggle.widget.LabeledSwitch
-                android:id="@+id/sync_drive"
-                android:layout_width="90dp"
-                android:layout_height="40dp"
-                android:textSize="14sp"
-                app:colorBorder="@color/colorAccent"
-                app:on="false" />
-        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/llMid"
@@ -274,18 +229,14 @@
 
         </LinearLayout>
 
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fab_camera"
+        <com.leinardi.android.speeddial.SpeedDialView
+            android:id="@+id/speedDial"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="10dp"
-            android:contentDescription="@string/fab_content_desc"
-            android:elevation="20sp"
-            android:src="@drawable/fab_camera"
-            ads:showMotionSpec="@anim/fab_scale_up" />
+            android:layout_gravity="bottom|end"
+            app:sdMainFabClosedSrc="@drawable/fab_camera" />
     </RelativeLayout>
 
 
@@ -296,4 +247,15 @@
         android:layout_alignParentBottom="true"
         android:orientation="vertical" />
 
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/white"
+        android:fitsSystemWindows="true"
+        ads:headerLayout="@layout/nav_header_main"
+        app:itemIconTint="@color/orange"
+        app:itemTextColor="@color/black"
+        app:menu="@menu/activity_main_drawer" />
 </androidx.drawerlayout.widget.DrawerLayout>

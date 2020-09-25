@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "com.cam.pdf.and.doc.india.scanner"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 29
         versionCode 2
         versionName '1.1'
@@ -105,7 +105,7 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.0'
     //Auto mail
     //implementation 'com.github.yesidlazaro:GmailBackground:1.2.0'
-   // implementation 'com.github.nextcloud:android-library:-SNAPSHOT'
+    // implementation 'com.github.nextcloud:android-library:-SNAPSHOT'
     //filter_image
     implementation 'it.chengdazhi.styleimageview:styleimageview:1.0.4'
     //photoview
@@ -134,5 +134,7 @@ dependencies {
         exclude group: 'org.apache.httpcomponents'
     }
     implementation 'com.github.angads25:toggle:1.1.0'
+    //Speed Dial Floating Action Button Libarary
+    implementation "com.leinardi.android:speed-dial:3.1.1"
 
 }
