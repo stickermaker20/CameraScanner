@@ -2,7 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/CameraScanner.iml" filepath="$PROJECT_DIR$/.idea/CameraScanner.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/CameraScanner.iml" filepath="$PROJECT_DIR$/.idea/CameraScanner.iml" group="CameraScanner" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="CameraScanner/app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/dynamicgrid/dynamicgrid.iml" filepath="$PROJECT_DIR$/.idea/modules/dynamicgrid/dynamicgrid.iml" group="CameraScanner/dynamicgrid" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/openCVLibrary310/openCVLibrary310.iml" filepath="$PROJECT_DIR$/.idea/modules/openCVLibrary310/openCVLibrary310.iml" group="CameraScanner/openCVLibrary310" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/photo-editor-sdk-2.0.27/photo-editor-sdk-2.0.27.iml" filepath="$PROJECT_DIR$/.idea/modules/photo-editor-sdk-2.0.27/photo-editor-sdk-2.0.27.iml" group="CameraScanner/photo-editor-sdk-2.0.27" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tedpicker/tedpicker.iml" filepath="$PROJECT_DIR$/.idea/modules/tedpicker/tedpicker.iml" group="CameraScanner/tedpicker" />
     </modules>
   </component>
 </project>

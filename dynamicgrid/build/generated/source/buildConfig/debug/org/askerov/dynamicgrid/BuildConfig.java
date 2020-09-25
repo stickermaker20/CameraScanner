@@ -5,9 +5,8 @@ package org.askerov.dynamicgrid;
 
 public final class BuildConfig {
   public static final boolean DEBUG = Boolean.parseBoolean("true");
-  public static final String APPLICATION_ID = "org.askerov.dynamicgrid";
+  public static final String LIBRARY_PACKAGE_NAME = "org.askerov.dynamicgrid";
   public static final String BUILD_TYPE = "debug";
-  public static final String FLAVOR = "";
   public static final int VERSION_CODE = 1;
   public static final String VERSION_NAME = "1.0";
 }

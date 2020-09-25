@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,11 +15,16 @@ import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,15 +32,19 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.MainApplication;
 //import com.google.android.gms.ads.AdListener;
 //import com.google.android.gms.ads.AdRequest;
 //import com.google.android.gms.ads.AdView;
+import com.MainFileAdapter;
 import com.github.angads25.toggle.interfaces.OnToggledListener;
 import com.github.angads25.toggle.model.ToggleableView;
 import com.github.angads25.toggle.widget.LabeledSwitch;
+import com.github.clans.fab.FloatingActionButton;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
@@ -50,9 +60,16 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.navigation.NavigationView;
+import com.itextpdf.text.Image;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static com.camv1.pdf.and.doc.india.scanner.PresenterScanner.FOLDER_NAME;
 
@@ -61,7 +78,7 @@ import static com.camv1.pdf.and.doc.india.scanner.PresenterScanner.FOLDER_NAME;
  * Created by HUNGDH. Edited by SonDD
  */
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, SwipeRefreshLayout.OnRefreshListener, NavigationView.OnNavigationItemSelectedListener {
 
     private CardView cvCamera, cvFromGallery, cvGallery, cvPDF;
     private static final int REQUEST_STORAGE = 212;
@@ -77,12 +94,63 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String token;
     public static final int RC_SIGN_IN = 420;
 
+    //StartListing Documents
+    ArrayList<String> inFiles;
+    MainFileAdapter adapter;
+    File[] files;
+    File folder;
+    @BindView(R.id.main_list)
+    ListView listView;
+    @BindView(R.id.main_swipe)
+    SwipeRefreshLayout swipeView;
+    private static final int INTENT_REQUEST_GET_IMAGES = 1;
+    private List<String> imagesUri = new ArrayList<>();
+    private Image image;
+    private String filename;
+    private String path;
+
+    FloatingActionButton fb_camera;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         adsTask = new AdsTask(this);
         // Obtain the shared Tracker instance.
+
+
+        ButterKnife.bind(this);
+        //Create/Open folder
+        SharedPreferences mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String folderName = mSharedPref.getString("storage_folder", FOLDER_NAME);
+        folder = new File(Environment.getExternalStorageDirectory() + "/" + folderName + "/");
+        if (!folder.exists()) {
+            folder.mkdir();
+        }
+        fb_camera = findViewById(R.id.fab_camera);
+        // Initialize variables
+        inFiles = new ArrayList<>();
+        files = folder.listFiles();
+        adapter = new MainFileAdapter(MainActivity.this, inFiles);
+        listView.setAdapter(adapter);
+        swipeView.setOnRefreshListener(this);
+        fb_camera.setOnClickListener(this);
+        // Populate data into listView
+        populateListView();
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle((Html.fromHtml("<font color=\"#FFFFFF\">" + "CamScanner India" + "</font>")));
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        toggle.getDrawerArrowDrawable().setColor(Color.WHITE);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
         MainApplication application = (MainApplication) getApplication();
 
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -272,7 +340,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } else {
                     startActivity(new Intent(MainActivity.this, MyPDFActivity.class));
                 }
+                break;
+            case R.id.fab_camera:
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
 
+                    if (mInterstitialAd.isLoaded() && mInterstitialAd != null) {
+                        p = 4;
+                        mInterstitialAd.show();
+                    } else {
+                        callCamera();
+                    }
+
+
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+                }
                 break;
         }
     }
@@ -434,5 +516,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 "Signed Out", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    @Override
+    public void onRefresh() {
+        Log.v("refresh", "refreshing dta");
+        populateListView();
+        swipeView.setRefreshing(false);
+    }
+
+    public void populateListView() {
+        inFiles = new ArrayList<>();
+        files = folder.listFiles();
+        if (files == null)
+            Toast.makeText(this, getString(R.string.no_pdf), Toast.LENGTH_LONG).show();
+        else {
+            addFile(folder);
+//            for (File file : files) {
+//                if (!file.isDirectory() && file.getName().endsWith(".pdf")) {
+//                    inFiles.add(file.getPath());
+//                    Collections.reverse(inFiles);
+//                    Log.v("adding", file.getName());
+//                } else if (file.isDirectory()) {
+//                    File[] files1 = file.listFiles();
+//
+//                }
+//            }
+
+        }
+        Log.v("done", "adding");
+        adapter = new MainFileAdapter(MainActivity.this, inFiles);
+        listView.setAdapter(adapter);
+    }
+
+    private void addFile(File file0) {
+        File[] files = file0.listFiles();
+        for (File file : files) {
+            if (!file.isDirectory() && file.getName().endsWith(".pdf")) {
+                inFiles.add(file.getPath());
+                Log.v("adding", file.getName());
+            } else if (file.isDirectory()) {
+                addFile(file);
+            }
+        }
+
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        return false;
     }
 }
