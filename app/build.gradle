@@ -136,5 +136,7 @@ dependencies {
     implementation 'com.github.angads25:toggle:1.1.0'
     //Speed Dial Floating Action Button Libarary
     implementation "com.leinardi.android:speed-dial:3.1.1"
-
+//OCR Libraries
+    implementation 'com.rmtheis:tess-two:6.0.4'
+    implementation 'com.theartofdev.edmodo:android-image-cropper:2.3.1'
 }

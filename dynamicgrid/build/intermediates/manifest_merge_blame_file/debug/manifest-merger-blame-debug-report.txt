@@ -5,10 +5,10 @@
 5    android:versionName="1.0" >
 6
 7    <uses-sdk
-7-->C:\Users\Sabeel\Desktop\CamScanner India\CameraScanner\dynamicgrid\AndroidManifest.xml:7:5-46
+7-->C:\Users\M. Sabeel Ahmed\Desktop\CamScanner India\CameraScanner\dynamicgrid\AndroidManifest.xml:7:5-46
 8        android:minSdkVersion="8"
-8-->C:\Users\Sabeel\Desktop\CamScanner India\CameraScanner\dynamicgrid\AndroidManifest.xml:7:5-46
+8-->C:\Users\M. Sabeel Ahmed\Desktop\CamScanner India\CameraScanner\dynamicgrid\AndroidManifest.xml:7:5-46
 9        android:targetSdkVersion="21" />
-9-->C:\Users\Sabeel\Desktop\CamScanner India\CameraScanner\dynamicgrid\AndroidManifest.xml:7:15-44
+9-->C:\Users\M. Sabeel Ahmed\Desktop\CamScanner India\CameraScanner\dynamicgrid\AndroidManifest.xml:7:15-44
 10
 11</manifest>

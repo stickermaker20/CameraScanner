@@ -45,6 +45,17 @@
         <!-- android:name="com.google.android.gms.ads.APPLICATION_ID" -->
         <!-- android:value="@string/admod_app_id"/> -->
         <!-- HUNGDH -->
+        <activity
+            android:name=".OCR.MyActivity"
+            android:theme="@style/MainTheme" />
+        <activity
+            android:name=".OCR.CropAndRotate"
+            android:theme="@style/MainTheme" />
+        <activity
+            android:name=".OCR.Recognizer"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:theme="@style/MainTheme" />
+
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />

@@ -8,24 +8,27 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class LocalDatabse {
     myDbHelper myhelper;
+    SQLiteDatabase dbb;
 
     public LocalDatabse(Context context) {
         myhelper = new myDbHelper(context);
+        dbb = myhelper.getWritableDatabase();
     }
 
     public long insertData(String DocName, String DocId) {
-        SQLiteDatabase dbb = myhelper.getWritableDatabase();
+        //    SQLiteDatabase dbb = myhelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(myDbHelper.DOC, DocName);
         contentValues.put(myDbHelper.DOCID, DocId);
         long id = dbb.insert(myDbHelper.TABLE_NAME, null, contentValues);
+        dbb.close();
         return id;
     }
 
     public String getDriveData() {
-        SQLiteDatabase db = myhelper.getWritableDatabase();
+        //  SQLiteDatabase db = myhelper.getWritableDatabase();
         String[] columns = {myDbHelper.SNO, myDbHelper.DOC, myDbHelper.DOCID};
-        Cursor cursor = db.query(myDbHelper.TABLE_NAME, columns, null, null, null, null, null);
+        Cursor cursor = dbb.query(myDbHelper.TABLE_NAME, columns, null, null, null, null, null);
         StringBuffer buffer = new StringBuffer();
         while (cursor.moveToNext()) {
             int cid = cursor.getInt(cursor.getColumnIndex(myDbHelper.SNO));
@@ -35,16 +38,15 @@ public class LocalDatabse {
             buffer.append(cid + "   " + DocName + "   " + DocId + " \n");
         }
         cursor.close();
-        db.close();
+        dbb.close();
         return buffer.toString();
     }
 
     public int delete(String uname) {
-        SQLiteDatabase db = myhelper.getWritableDatabase();
+        // SQLiteDatabase db = myhelper.getWritableDatabase();
         String[] whereArgs = {uname};
-
-        int count = db.delete(myDbHelper.TABLE_NAME, myDbHelper.DOC + " = ?", whereArgs);
-        db.close();
+        int count = dbb.delete(myDbHelper.TABLE_NAME, myDbHelper.DOC + " = ?", whereArgs);
+        dbb.close();
         return count;
     }
 

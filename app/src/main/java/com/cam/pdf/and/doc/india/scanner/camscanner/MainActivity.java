@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -38,6 +39,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.MainApplication;
 import com.MainFileAdapter;
+import com.cam.pdf.and.doc.india.scanner.OCR.MyActivity;
 import com.cam.pdf.and.doc.india.scanner.R;
 import com.cam.pdf.and.doc.india.scanner.listdoc.DocsActivity;
 import com.camv1.pdf.and.doc.india.scanner.Config.AdsTask;
@@ -109,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Image image;
     private String filename;
     private String path;
+    private ImageView ocr;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -159,6 +162,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         initAds();
 
+        ocr = findViewById(R.id.ocr_Scan);
+        ocr.setOnClickListener(MainActivity.this);
         final SpeedDialView speedDialView = findViewById(R.id.speedDial);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             speedDialView.addActionItem(
@@ -191,7 +196,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             } else {
                                 callCamera();
                             }
-
 
                         } else {
                             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
@@ -390,6 +394,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } else {
                     startActivity(new Intent(MainActivity.this, MyPDFActivity.class));
                 }
+                break;
+            case R.id.ocr_Scan:
+                startActivity(new Intent(MainActivity.this, MyActivity.class));
                 break;
         }
     }

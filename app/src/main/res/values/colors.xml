@@ -32,5 +32,6 @@
     <color name="main_select_background">#6634475c</color>
 
     <color name="color_main_type">#535252</color>
+    <color name="red">#FF1100</color>
 
 </resources>

@@ -16,12 +16,21 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/ll_ads">
 
+
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
             android:background="@color/colorPrimary"
             app:popupTheme="@style/Widget.AppCompat.PopupMenu" />
+        <ImageView
+            android:id="@+id/ocr_Scan"
+            android:layout_width="?actionBarSize"
+            android:layout_height="?actionBarSize"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:padding="15dp"
+            android:src="@drawable/ocr" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/main_swipe"
@@ -51,7 +60,8 @@
             android:layout_alignParentBottom="true"
             android:layout_marginLeft="7dp"
             android:layout_marginRight="7dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
